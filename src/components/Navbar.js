@@ -5,6 +5,7 @@ import './Navbar.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 
+
 //아이콘들
 import { PiHeartStraightLight } from "react-icons/pi"; //빈하트
 import { PiHeartStraightFill } from "react-icons/pi"; //채운하트
@@ -58,16 +59,17 @@ function Navbar({ onLogin }) {
                     </li>
                 </ul>
             </div>
-            <div className="droupBtn" color = "light">
-
-            <DropdownButton title="더보기"  onSelect={(eventKey) => 
+           
+            <div className="droupBtn">         
+              <DropdownButton title="더보기"  onSelect={(eventKey) => 
                 console.log(eventKey)}>
-              <Dropdown.Item eventKey="item1">아이템1 test</Dropdown.Item>
+              <Dropdown.Item eventKey="item1">아이템1</Dropdown.Item>
               <Dropdown.Item eventKey="item2">아이템2</Dropdown.Item>
               <Dropdown.Item eventKey="item3">아이템3</Dropdown.Item>
            </DropdownButton>
           
-            </div>
+           </div>
+ 
         </nav>
     );
 }

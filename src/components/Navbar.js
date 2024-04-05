@@ -62,7 +62,7 @@ function Navbar({ onLogin }) {
 
             <DropdownButton title="더보기"  onSelect={(eventKey) => 
                 console.log(eventKey)}>
-              <Dropdown.Item eventKey="item1">아이템1</Dropdown.Item>
+              <Dropdown.Item eventKey="item1">아이템1 test</Dropdown.Item>
               <Dropdown.Item eventKey="item2">아이템2</Dropdown.Item>
               <Dropdown.Item eventKey="item3">아이템3</Dropdown.Item>
            </DropdownButton>

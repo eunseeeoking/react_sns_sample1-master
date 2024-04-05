@@ -1,0 +1,43 @@
+/* src/pages/Profile.css */
+.container_login {
+    max-width: 300px;
+    margin: 100px 10px 10px 1100px;
+    border: 1px solid #ccc;
+    border-radius: 15px;
+    padding: 15px;
+   
+  } 
+  .container_login input{
+    font-size: 15px;
+  }
+
+.contatiner_header{
+  text-align: center;
+  margin-bottom: 15px;
+  padding: 15px;
+  font-weight: bold;
+  font-size: 50px;
+}
+#LoginImgBox{
+  position: absolute;
+  width: 420px;
+  left : 550px;
+  top : 50px;
+}
+#LoginImgPhone{
+  position: absolute;
+  width: 500px;
+  
+}
+#LoginImgPhoneSlide{
+  position: absolute;
+  top : 123px;
+  right: 6px;
+  border-radius: 15px;
+
+
+}
+#LoginImgPhoneSlide img{
+  height: 652px;
+  width: 359px;
+}

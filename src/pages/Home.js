@@ -7,14 +7,13 @@ import { Provider, useSelector, useDispatch } from 'react-redux';
 
 function Home({onLogin}){
     const [list, setList] = useState([]);
-    onLogin(); 
-    useEffect(() => {
-    async function fetchProfile() {
     
+    useEffect(() => {
+      onLogin();
+    async function fetchProfile() {
       try {
         const response = await fetch(`http://localhost:4000/boardListSearch.dox`);
         const jsonData = await response.json();
-        console.log(jsonData);    
         setList(jsonData);
         
     }

@@ -36,7 +36,7 @@ const Login = ({onLogin}) => {
             alert("로그인 성공");
             sessionStorage.setItem('userId', userId);
             onLogin();
-            navigate('/profile');
+            navigate(`/profile/${userId}`);
 
         }
         else{

@@ -89,7 +89,7 @@ app.get('/profileBoardListSearch.dox', function (req, res) {
   });
   app.get('/boardListSearch.dox', function (req, res) {
 
-  
+    
     connection.query(`SELECT * FROM es_sns_board`, function (error, results, fields) {
       if (error) throw error;
    
@@ -189,7 +189,7 @@ app.get('/login', function (req, res) {
 
 });
 
-app.get('/sessionCheck.dox', function (req, res) {
+app.get('/sessionCheck.dox' , function (req, res) {
   console.log("체크 ==>" , req.session.userId);
   connection.query(`SELECT * FROM ES_SNS_USER WHERE userId = '${req.session.userId}'`, function (error, results, fields) {
     if (error) throw error;
@@ -217,6 +217,18 @@ app.get('/login.dox', function (req, res) {
      }
     
   });
+});
+
+app.get('/SearchUserList.dox', function (req, res) {
+  var map = req.query;
+  console.log(map.userId);
+  if(map.userId!=""){
+    connection.query(`SELECT * FROM ES_SNS_USER WHERE userId LIKE '%${map.userId}%'`, function (error, results, fields) {
+      if (error) throw error;
+      res.send(results);
+    })
+  }
+ 
 });
 
 

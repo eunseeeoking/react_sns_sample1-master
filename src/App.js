@@ -12,10 +12,14 @@ import Login from './pages/Login';
 
 
 
+
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   
     async function sessionFlg() {
+   
+
+
       let userId = sessionStorage.getItem("userId");
       if(userId ==null){
         setIsLoggedIn(false);
@@ -30,10 +34,9 @@ function App() {
       <Router>
       {isLoggedIn && <Navbar onLogin={sessionFlg}/>}
         <Routes>
-          <Route path="/" element={<Login onLogin={sessionFlg} />} />
+          <Route path="/" element={<Login onLogin={sessionFlg}/>} />
               <Route path="/home" element={<Home onLogin={sessionFlg}/>} />
-              <Route path="/profile" element={<Profile onLogin={sessionFlg} />} />
-            
+              <Route path="/profile/:userId" element={<Profile onLogin={sessionFlg}/>} />
           </Routes>
       </Router>
     </div>

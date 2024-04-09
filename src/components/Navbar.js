@@ -5,7 +5,7 @@ import './Navbar.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import logo from '../123.png';
 import Post from '../components/UserList';
-
+import { useNavigate } from 'react-router-dom';
 
 //아이콘들
 import { PiHeartStraightLight } from "react-icons/pi"; //빈하트
@@ -34,6 +34,89 @@ function Navbar({ onLogin }) {
     const [isNextBtn, setisNextBtn] = useState(false);
 
     const [selectedImage, setSelectedImage] = useState(null);
+    const navigate = useNavigate();
+
+    const TypeChange = async ()=>{
+        await fetch(selectedImage)
+        .then(response => response.blob())
+        .then(blobData => {
+          // blobData를 사용하여 원하는 작업을 수행
+          console.log("이거 언제 찍히는거지?" , blobData);
+          selectedImage=blobData;
+          
+        })
+        .catch(error => {
+          console.error('Error fetching blob data:', error);
+        });
+    }
+    const submitWrite = async () => {
+    
+        const content = document.getElementById("content").value;
+   
+    
+        try {
+            const formData = {};
+            formData.image = selectedImage;
+            formData.content = content;
+            formData.userId = sessionStorage.userId;
+
+            console.log("formData ==>",formData);
+            const now = new Date();
+            const year = now.getFullYear().toString().slice(-2);
+            const month = (now.getMonth() + 1).toString().padStart(2, '0');
+            const day = now.getDate().toString().padStart(2, '0');
+            const hours = now.getHours().toString().padStart(2, '0');
+            const minutes = now.getMinutes().toString().padStart(2, '0');
+            const seconds = now.getSeconds().toString().padStart(2, '0');
+    
+            const timestamp = `${year}${month}${day}${hours}${minutes}${seconds}`;
+            let files = [];
+            for (const file of selectedImage) {
+                const fileName = `${timestamp}_${file.name}`; // 저장되는 순간의 시간(YYMMDDHHmmss)을 파일 이름과 같이 저장     
+                files.push({fileName : fileName, fileOrgName : file.name});   
+                const imgformData = new FormData();
+                imgformData.append('file', file, fileName); 
+                try {
+                    const response = await fetch('http://localhost:4000/upload', {
+                        method: 'POST',
+                        body: imgformData
+                    });
+                    
+                    if (!response.ok) {
+                        throw new Error('이미지 업로드에 실패했습니다.');
+                    }
+            
+                    const responseData = await response.json();
+                    alert(responseData); // 업로드 결과 출력
+                } catch (error) {
+                    console.error('이미지 업로드 오류:', error.message);
+                    // 오류 처리
+                }
+            }
+            formData.files = files;
+            const response = await fetch(`http://localhost:4000/snsWriteBoard.dox`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(formData)
+            });
+    
+            const jsonData = await response.json();
+            console.log("formData===>>>", formData);
+            alert(jsonData.message);
+            navigate('/'); // 작성 후에 홈 화면으로 이동
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    };
+
+
+
+
+
+
+
 
     // 파일 드래그 이벤트 핸들러
     const handleDragOver = (e) => {
@@ -62,9 +145,19 @@ function Navbar({ onLogin }) {
         setWriteOpen(!isWriteOpen);
         setSelectedImage(null);
     }
-    function nextBtn(){
-        setisNextBtn(true);
+    async function nextBtn(){
+        if(isNextBtn == true){
+            console.log(document.getElementById("content").value);
+            console.log(selectedImage);
+          await TypeChange()
+           submitWrite()
+        }else{
+            setisNextBtn(true);
+        }
+       
     }
+
+
     function backBtn(){
         setisNextBtn(false);
         if(isNextBtn==false && selectedImage!=null){
@@ -154,13 +247,20 @@ function Navbar({ onLogin }) {
                         <div className={`${isWriteOpen ? 'WriteBoxVisible drop-area' : 'WriteBoxHidden'}`} onDragOver={handleDragOver} onDrop={handleDrop} onClick={(e) => e.stopPropagation()}>
                             {selectedImage ? (
                                <div className="">
-                                    <div className="nextBar">
+                                    <div className={`${!isNextBtn ? 'nextBar' : 'endBar'}`}>
                                     <a className="backBtn" onClick={backBtn}> ← </a>
-                                    <a className="NextBtn" onClick={nextBtn}>{isNextBtn == false ? '다음' : '작성완료'}</a>
+                                    <a className="NextBtn" onClick={nextBtn}>{isNextBtn == false ? '다음' : ''}</a>
                                     </div>
                                 <img src={selectedImage} alt="Uploaded" style={{ width: '800px', height: '800px' }}></img>
                                 <div className={`${isNextBtn ? 'WriteBoxContentsVisible' : 'WriteBoxContentsHidden'}`}>
-                                    새 게시물 만들기
+                                        <div className="WriteContentsBox_header">
+                                        <a className="NextBtn" onClick={nextBtn}>{isNextBtn == true ? '작성완료' : ''}</a>
+                                        </div>
+                                        <div className="WriteContentsBox_body">
+                                            {sessionStorage.userId}
+                                            <textarea rows="15"  placeholder="문구를 입력하세요..." id="content"></textarea>
+                                      
+                                    </div>
                                 </div>
                                 </div>
                             ) : (

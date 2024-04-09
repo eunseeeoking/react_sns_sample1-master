@@ -4,6 +4,7 @@ const mysql = require('mysql');
 const path = require('path');
 var escapeHtml = require('escape-html')
 var session = require('express-session')
+const bodyParser = require('body-parser');
 
 const app = express();
 
@@ -14,9 +15,15 @@ app.use(session({
   saveUninitialized: false,
 }))
 
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
+
 //ejs 설정
 app.set('view engine','ejs');
 app.set('views',path.join(__dirname,'.')); // .은 경로
+
+app.use('/img', express.static(path.join(__dirname, '/', 'img')));
 
 // MySQL 연결 설정
 const connection = mysql.createConnection({
@@ -67,7 +74,7 @@ app.get('/profile.dox', function (req, res) {
 app.get('/profileBoardListSearch.dox', function (req, res) {
   var map = req.query;
   console.log(map);
-  connection.query(`SELECT * FROM es_sns_board WHERE USERID = ?`,[map.userId], function (error, results, fields) {
+  connection.query(`SELECT * FROM es_sns_board b INNER JOIN ES_SNS_BOARD_IMG I ON B.BOARDNO = I.BOARDNO  WHERE USERID = ? ORDER BY B.BOARDNO DESC`,[map.userId], function (error, results, fields) {
       if(error) throw error
     
       res.send(results);
@@ -90,7 +97,7 @@ app.get('/profileBoardListSearch.dox', function (req, res) {
   app.get('/boardListSearch.dox', function (req, res) {
 
     
-    connection.query(`SELECT * FROM es_sns_board`, function (error, results, fields) {
+    connection.query(`SELECT * FROM es_sns_board B INNER JOIN ES_SNS_BOARD_IMG I ON B.BOARDNO = I.BOARDNO order by B.boardNo desc`, function (error, results, fields) {
       if (error) throw error;
    
      res.send(results);
@@ -219,6 +226,7 @@ app.get('/login.dox', function (req, res) {
   });
 });
 
+
 app.get('/SearchUserList.dox', function (req, res) {
   var map = req.query;
   console.log(map.userId);
@@ -229,6 +237,49 @@ app.get('/SearchUserList.dox', function (req, res) {
     })
   }
  
+});
+
+const multer = require('multer'); // npm install multer
+
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+      cb(null, 'img/'); // 파일이 저장될 경로 설정
+  },
+  filename: (req, file, cb) => {
+      cb(null, file.originalname); // 파일 이름 설정
+  }
+});
+const upload = multer({ storage: storage });
+app.post('/upload', upload.single('file'), (req, res) => {
+  console.log('파일', req.file);
+  res.send({result : "success"});
+    
+});
+
+
+
+app.post('/snsWriteBoard.dox', (req, res) => {
+  const map = req.body;
+  console.log("map==>>>>", req.body);
+  connection.query("INSERT INTO ES_SNS_BOARD VALUES (NULL, ?, 'TEST', ?,0,0,1,NOW(),NOW())", [map.userId, map.content], (error, results, fields) => {
+    if (error) throw error;
+    
+    const boardNo = results.insertId; // 새로 생성된 게시글의 번호 가져오기
+
+  const filePaths = req.body.files; // 이미지 파일 경로들
+  console.log("filePathsf ==>>>>>>" , filePaths);
+   for(var i =0; i<filePaths.length;i++){
+    const fileName = filePaths[i].fileName; // 파일명
+    console.log("fileName ===>>" ,fileName );
+    const fileOrgName = filePaths[i].fileOrgName; // 원본 파일명
+    connection.query("INSERT INTO ES_SNS_BOARD_IMG (boardNo, filePath, FILENAME, fileOrgName) VALUES (?, ?, ?, ?)", [boardNo, "/", fileName, fileOrgName], (error, results, fields) => {
+      if (error) throw error;
+      console.log("이미지 파일이 성공적으로 삽입되었습니다.");
+    });
+ }
+  
+  res.send({ message: "게시글 작성 및 이미지 업로드가 완료되었습니다." });
+  });
 });
 
 

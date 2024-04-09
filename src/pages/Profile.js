@@ -26,7 +26,7 @@ const Profile = ({onLogin}) => {
       try{
         const response = await fetch(`http://localhost:4000/profileBoardListSearch.dox?userId=${userId}`);
         const jsonData = await response.json();
-        console.log(jsonData.length);
+        console.log(jsonData);
         post = jsonData.length;
         console.log(userInfo);
         setList(jsonData);
@@ -82,7 +82,7 @@ const Profile = ({onLogin}) => {
           <h3>내가 작성한 게시글</h3>
           <div className="posts-list">
             {list.map(post => (
-              <ProfilePost key={post.BOARDNO} title={post.TITLE} content={post.CONTENTS} />
+              <ProfilePost key={post.BOARDNO} title={post.TITLE} content={post.CONTENTS} fileName={post.FILENAME} />
             ))}
           </div>
         </div>

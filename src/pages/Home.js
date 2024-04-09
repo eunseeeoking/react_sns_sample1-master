@@ -14,6 +14,7 @@ function Home({onLogin}){
       try {
         const response = await fetch(`http://localhost:4000/boardListSearch.dox`);
         const jsonData = await response.json();
+        console.log(jsonData);
         setList(jsonData);
         
     }
@@ -40,7 +41,7 @@ function Home({onLogin}){
   <div className="row justify-content-center">
       <div className="col-sm-6 col-md-6 col-lg-6">
           {list.map(post => (
-              <Post key={post.BOARDNO} userid ={post.USERID} like={post.LIKE}  title={post.TITLE} content={post.CONTENTS} />
+              <Post key={post.BOARDNO} userid ={post.USERID} like={post.LIKE} fileName={post.FILENAME} title={post.TITLE} content={post.CONTENTS} />
           ))}
       </div>
   </div>

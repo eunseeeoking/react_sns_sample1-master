@@ -6,8 +6,9 @@ function Menu(props){
     return <div className="menu">
                 <div>작성자 : {props.userid}</div>
                 <div className="menu-title">{props.title}</div>
+                <img src={`http://localhost:4000/img/${props.fileName}`}></img>
                 <div className="menu-content">{props.content}</div>
-                <PiHeartStraightLight/>< PiHeartStraightFill/>
+                <PiHeartStraightLight />< PiHeartStraightFill style={{ color: 'red' }}/>
 
             </div>
 }

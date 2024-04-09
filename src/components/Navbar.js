@@ -15,6 +15,7 @@ import { RiHomeSmileFill } from "react-icons/ri"; //채운집
 import { BsSearchHeart, BsSearchHeartFill } from "react-icons/bs";
 import { IoCreateOutline, IoCreateSharp } from "react-icons/io5";
 import { AiOutlineMessage, AiFillMessage } from "react-icons/ai";
+import { TfiMenuAlt } from "react-icons/tfi";
 //여기까지
 
 
@@ -30,25 +31,15 @@ import { AiOutlineMessage, AiFillMessage } from "react-icons/ai";
 function Navbar({ onLogin }) {
     const [isSearchOpen, setIsSearchOpen] = useState(false);
     const [isWriteOpen, setWriteOpen] = useState(false);
-   
+    const [isWriteEnd, setWriteEnd] = useState(false);
     const [isNextBtn, setisNextBtn] = useState(false);
 
     const [selectedImage, setSelectedImage] = useState(null);
     const navigate = useNavigate();
 
-    const TypeChange = async ()=>{
-        await fetch(selectedImage)
-        .then(response => response.blob())
-        .then(blobData => {
-          // blobData를 사용하여 원하는 작업을 수행
-          console.log("이거 언제 찍히는거지?" , blobData);
-          selectedImage=blobData;
-          
-        })
-        .catch(error => {
-          console.error('Error fetching blob data:', error);
-        });
-    }
+    const [selectedFile, setSelectedFile] = useState(null);
+
+    
     const submitWrite = async () => {
     
         const content = document.getElementById("content").value;
@@ -56,11 +47,8 @@ function Navbar({ onLogin }) {
     
         try {
             const formData = {};
-            formData.image = selectedImage;
             formData.content = content;
             formData.userId = sessionStorage.userId;
-
-            console.log("formData ==>",formData);
             const now = new Date();
             const year = now.getFullYear().toString().slice(-2);
             const month = (now.getMonth() + 1).toString().padStart(2, '0');
@@ -68,12 +56,14 @@ function Navbar({ onLogin }) {
             const hours = now.getHours().toString().padStart(2, '0');
             const minutes = now.getMinutes().toString().padStart(2, '0');
             const seconds = now.getSeconds().toString().padStart(2, '0');
-    
             const timestamp = `${year}${month}${day}${hours}${minutes}${seconds}`;
-            let files = [];
-            for (const file of selectedImage) {
+           
+            const file = selectedFile;
+           
+             let files = [];
                 const fileName = `${timestamp}_${file.name}`; // 저장되는 순간의 시간(YYMMDDHHmmss)을 파일 이름과 같이 저장     
                 files.push({fileName : fileName, fileOrgName : file.name});   
+
                 const imgformData = new FormData();
                 imgformData.append('file', file, fileName); 
                 try {
@@ -85,15 +75,15 @@ function Navbar({ onLogin }) {
                     if (!response.ok) {
                         throw new Error('이미지 업로드에 실패했습니다.');
                     }
-            
                     const responseData = await response.json();
-                    alert(responseData); // 업로드 결과 출력
+                
                 } catch (error) {
                     console.error('이미지 업로드 오류:', error.message);
                     // 오류 처리
                 }
-            }
+
             formData.files = files;
+            console.log("formData===>>>", JSON.stringify(formData));
             const response = await fetch(`http://localhost:4000/snsWriteBoard.dox`, {
                 method: 'POST',
                 headers: {
@@ -103,9 +93,9 @@ function Navbar({ onLogin }) {
             });
     
             const jsonData = await response.json();
-            console.log("formData===>>>", formData);
-            alert(jsonData.message);
-            navigate('/'); // 작성 후에 홈 화면으로 이동
+            
+            setWriteEnd(true);
+            
         } catch (error) {
             console.error("Error:", error);
         }
@@ -127,6 +117,7 @@ function Navbar({ onLogin }) {
     const handleDrop = (e) => {
         e.preventDefault();
         const file = e.dataTransfer.files[0];
+        setSelectedFile(file);
         if (file && file.type.startsWith('image/')) {
             setSelectedImage(URL.createObjectURL(file));
             // 파일 업로드 로직을 추가할 수 있습니다.
@@ -145,12 +136,13 @@ function Navbar({ onLogin }) {
         setWriteOpen(!isWriteOpen);
         setSelectedImage(null);
     }
-    async function nextBtn(){
+    function nextBtn(){
         if(isNextBtn == true){
-            console.log(document.getElementById("content").value);
-            console.log(selectedImage);
-          await TypeChange()
            submitWrite()
+           if(isWriteEnd==true){
+            toggleWrite();
+            navigate('/home');
+           }
         }else{
             setisNextBtn(true);
         }
@@ -162,6 +154,7 @@ function Navbar({ onLogin }) {
         setisNextBtn(false);
         if(isNextBtn==false && selectedImage!=null){
             setSelectedImage(null);
+            setSelectedFile(null);
         }
     }
     useEffect(() => {
@@ -183,7 +176,6 @@ function Navbar({ onLogin }) {
         var userId = document.getElementById("userId").value;
         if (userId != "") {
             try {
-
                 const response = await fetch(`http://localhost:4000/SearchUserList.dox?userId=${userId}`);
                 const jsonData = await response.json();
 
@@ -216,7 +208,7 @@ function Navbar({ onLogin }) {
                         <Link className="nav-link" to={`/profile/${sessionStorage.getItem("userId")}`} onClick={onLogin}>{isSearchOpen == false ? '프로필' : '★'}</Link>
                     </li>
                     <li className="nav-item">
-                        <a className="nav-link" onClick={toggleSearch}>{isSearchOpen === true ? <BsSearchHeartFill /> : <BsSearchHeart />}{isSearchOpen == false ? '검색' : ''}</a>
+                        <a className="nav-link" onClick={toggleSearch}>{isSearchOpen === true ? <BsSearchHeartFill style={{ color: 'red' }} /> : <BsSearchHeart />}{isSearchOpen == false ? '검색' : ''}</a>
 
                         <div className={`navSearch ${isSearchOpen ? 'SearchVisible' : 'SearchHidden'}`}>
                             <div className="SearchbarHeader">
@@ -234,7 +226,7 @@ function Navbar({ onLogin }) {
                     </li>
 
                     <li className="nav-item">
-                        <Link className="nav-link" to="issue" onClick={onLogin}> {location.pathname === "/issue" ? <PiHeartStraightFill /> : <PiHeartStraightLight />}{isSearchOpen == false ? '탐색' : ''} </Link>
+                        <Link className="nav-link" to="issue" onClick={onLogin}> {location.pathname === "/issue" ? <PiHeartStraightFill style={{ fontSize: '24px', color:'red' }}/> : <PiHeartStraightLight />}{isSearchOpen == false ? '탐색' : ''} </Link>
                     </li>
                     <li className="nav-item">
                         <a className="nav-link" onClick={toggleWrite}>
@@ -281,7 +273,7 @@ function Navbar({ onLogin }) {
             </div>
 
             <div className="droupBtn">
-                <DropdownButton title={isSearchOpen == false ? '더보기' : 'ㅁ'} className={isSearchOpen == false ? 'dropdownVisible' : 'dropdownHidden'} onSelect={(eventKey) =>
+                <DropdownButton title={isSearchOpen == false ? `더보기` : <TfiMenuAlt />} className={isSearchOpen == false ? 'dropdownVisible' : 'dropdownHidden'} onSelect={(eventKey) =>
                     window.location.href = eventKey}>
                     <Dropdown.Item eventKey="item1">아이템1</Dropdown.Item>
                     <Dropdown.Item eventKey="item2">아이템2</Dropdown.Item>

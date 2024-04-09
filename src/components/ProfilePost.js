@@ -3,8 +3,9 @@ import './Menu.css'
 
 function ProfilePost(props){
     return <div className="menu">
-                <div className="menu-title">{props.title}</div>
-                <div className="menu-content">{props.content}</div>
+                
+                    <img src={`http://localhost:4000/img/${props.fileName}`} style={{width : '200px' , height : '200px'}}></img>
+                
             </div>
 }
 
